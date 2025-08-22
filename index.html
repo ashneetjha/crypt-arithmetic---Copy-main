@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cryptarithmetic</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('/public/Background.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .game-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .logo {
+            height: 60px;
+        }
+        
+        .game-title {
+            color: #d4af37;
+            font-size: 3rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            letter-spacing: 3px;
+        }
+        
+        .timer-display {
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            border: 2px solid #d4af37;
+        }
+        
+        .game-area {
+            flex: 1;
+            margin: 30px;
+            background-color: rgba(139, 69, 19, 0.9);
+            border-radius: 15px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .puzzle-display {
+            background-color: rgba(101, 67, 33, 0.95);
+            border-radius: 10px;
+            padding: 30px;
+            border: 2px solid #8B4513;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .puzzle-equation {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #d4af37;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+        
+        .letter-inputs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .letter-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: rgba(61, 39, 20, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #654321;
+        }
+        
+        .letter-label {
+            color: #d4af37;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .digit-input {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border: 2px solid #8B4513;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+        
+        .digit-input:focus {
+            outline: none;
+            border-color: #d4af37;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #8B4513, #A0522D);
+            margin: 5% auto;
+            padding: 30px;
+            border: 3px solid #d4af37;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 600px;
+            color: #fff;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-header {
+            color: #d4af37;
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            border-bottom: 2px solid #d4af37;
+            padding-bottom: 15px;
+        }
+        
+        .close {
+            color: #d4af37;
+            float: right;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            top: 15px;
+            right: 25px;
+        }
+        
+        .close:hover {
+            color: #fff;
+        }
+        
+        .rules-list {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin: 20px 0;
+        }
+        
+        .rules-list li {
+            margin-bottom: 10px;
+            padding-left: 10px;
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .action-button {
+            background: linear-gradient(45deg, #8B4513, #A0522D);
+            color: #d4af37;
+            border: 2px solid #654321;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .action-button:hover {
+            background: linear-gradient(45deg, #A0522D, #CD853F);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(139, 69, 19, 0.5);
+        }
+        
+        .results-section {
+            background-color: rgba(101, 67, 33, 0.95);
+            padding: 25px;
+            border-radius: 10px;
+            min-height: 150px;
+            max-height: 250px;
+            overflow-y: auto;
+            border: 2px solid #8B4513;
+            margin-top: 20px;
+        }
+        
+        .timer {
+            text-align: center;
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #d4af37;
+            font-weight: bold;
+        }
+        
+        .error {
+            color: #ff6b6b;
+            margin-top: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .solution {
+            font-family: 'Courier New', monospace;
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+            color: #fff;
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 8px;
+            border-radius: 5px;
+        }
+        
+        .skip-btn {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(45deg, #FF6347, #FF4500);
+            color: #fff;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 16px;
+        }
+        
+        .skip-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(255, 99, 71, 0.5);
+        }
+        
+        .check-btn {
+            background: linear-gradient(45deg, #228B22, #32CD32);
+            color: #fff;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 18px;
+            margin: 20px 10px;
+        }
+        
+        .check-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(34, 139, 34, 0.5);
+        }
+        
+        .new-puzzle-btn {
+            background: linear-gradient(45deg, #4169E1, #6495ED);
+            color: #fff;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 18px;
+            margin: 20px 10px;
+        }
+        
+        .new-puzzle-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(65, 105, 225, 0.5);
+        }
+        
+        .feedback {
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .feedback.correct {
+            background-color: rgba(34, 139, 34, 0.3);
+            color: #90EE90;
+            border: 2px solid #32CD32;
+        }
+        
+        .feedback.incorrect {
+            background-color: rgba(220, 20, 60, 0.3);
+            color: #FFB6C1;
+            border: 2px solid #DC143C;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <img src="public\Main CQ heading.png" alt="Campus Quest" class="logo" />
+            <h1 class="game-title">CRYPTARITHMETIC</h1>
+          
+        </div>
+        
+        <div class="game-area">
+            <div class="puzzle-display">
+                <div class="puzzle-equation" id="puzzle-equation">SEND + MORE = MONEY</div>
+                <p style="color: #fff; font-size: 1.1rem;">Assign unique digits (0-9) to each letter to make the equation true!</p>
+            </div>
+            
+            <div class="letter-inputs" id="letter-inputs">
+                <!-- Letter input groups will be generated dynamically -->
+            </div>
+            
+            <div class="button-container">
+                <button id="check-btn" class="check-btn">Check Solution</button>
+                <button id="new-puzzle-btn" class="new-puzzle-btn">New Puzzle</button>
+                <button id="rules-btn" class="action-button">Game Rules</button>
+            </div>
+            
+            <div class="feedback" id="feedback" style="display: none;"></div>
+            
+            <div class="timer" id="timer">Puzzle Time: 0.00s</div>
+        </div>
+        
+        <button class="skip-btn" onclick="skipPuzzle()">SKIP</button>
+        
+        <!-- Game Rules Modal -->
+        <div id="rulesModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div class="modal-header">Cryptarithmetic Puzzle Rules</div>
+                <ol class="rules-list">
+                    <li>Each letter represents a unique digit (0-9)</li>
+                    <li>The same letter always represents the same digit throughout the puzzle</li>
+                    <li>Different letters must represent different digits</li>
+                    <li>Leading digits (first letter of any word) cannot be zero</li>
+                    <li>Find the digit assignment that makes the arithmetic equation true</li>
+                    <li>Use logic and deduction to solve the puzzle step by step</li>
+                </ol>
+                <p style="margin-top: 20px; font-style: italic; text-align: center;">Example: If S=9, E=5, N=6, D=7, M=1, O=0, R=8, Y=2<br>Then: 9567 + 1085 = 10652 ✓</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Predefined puzzles
+        const puzzles = [
+            { equation: "SEND + MORE = MONEY", word1: "SEND", word2: "MORE", result: "MONEY" },
+            { equation: "TWO + TWO = FOUR", word1: "TWO", word2: "TWO", result: "FOUR" },
+            { equation: "BASE + BALL = GAMES", word1: "BASE", word2: "BALL", result: "GAMES" },
+            { equation: "CROSS + ROADS = DANGER", word1: "CROSS", word2: "ROADS", result: "DANGER" },
+            { equation: "FORTY + TEN + TEN = SIXTY", word1: "FORTY", word2: "TWENTY", result: "SIXTY" },
+            { equation: "EAT + THAT = APPLE", word1: "EAT", word2: "THAT", result: "APPLE" }
+        ];
+        
+        let currentPuzzle = 0;
+        let startTime = null;
+        let timerInterval = null;
+        let puzzleStartTime = null;
+        
+        // Timer functionality
+        function startStopwatch() {
+            startTime = Date.now();
+            timerInterval = setInterval(updateStopwatch, 100);
+        }
+        
+        function stopStopwatch() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+        
+        function updateStopwatch() {
+            if (startTime) {
+                const elapsed = Date.now() - startTime;
+                const minutes = Math.floor(elapsed / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                document.getElementById('time-display').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+        
+        function startPuzzleTimer() {
+            puzzleStartTime = Date.now();
+        }
+        
+        function updatePuzzleTimer() {
+            if (puzzleStartTime) {
+                const elapsed = (Date.now() - puzzleStartTime) / 1000;
+                document.getElementById('timer').textContent = `Puzzle Time: ${elapsed.toFixed(2)}s`;
+            }
+        }
+        
+        // Initialize puzzle
+        function initializePuzzle() {
+            const puzzle = puzzles[currentPuzzle];
+            document.getElementById('puzzle-equation').textContent = puzzle.equation;
+            
+            // Get unique letters
+            const letters = [...new Set((puzzle.word1 + puzzle.word2 + puzzle.result).split(''))].sort();
+            
+            // Create input fields for each letter
+            const letterInputsContainer = document.getElementById('letter-inputs');
+            letterInputsContainer.innerHTML = '';
+            
+            letters.forEach(letter => {
+                const letterGroup = document.createElement('div');
+                letterGroup.className = 'letter-group';
+                
+                const label = document.createElement('div');
+                label.className = 'letter-label';
+                label.textContent = letter;
+                
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.className = 'digit-input';
+                input.id = `input-${letter}`;
+                input.min = '0';
+                input.max = '9';
+                input.addEventListener('input', validateInput);
+                
+                letterGroup.appendChild(label);
+                letterGroup.appendChild(input);
+                letterInputsContainer.appendChild(letterGroup);
+            });
+            
+            // Reset feedback and timer
+            document.getElementById('feedback').style.display = 'none';
+            startPuzzleTimer();
+            setInterval(updatePuzzleTimer, 100);
+        }
+        
+        // Validate input to ensure single digit
+        function validateInput(event) {
+            const input = event.target;
+            if (input.value.length > 1) {
+                input.value = input.value.slice(-1);
+            }
+        }
+        
+        // Check if solution is correct
+        function checkSolution() {
+            const puzzle = puzzles[currentPuzzle];
+            const assignment = {};
+            const usedDigits = new Set();
+            
+            // Get all letter assignments
+            const letters = [...new Set((puzzle.word1 + puzzle.word2 + puzzle.result).split(''))].sort();
+            
+            for (const letter of letters) {
+                const input = document.getElementById(`input-${letter}`);
+                const value = input.value;
+                
+                if (value === '') {
+                    showFeedback('Please assign digits to all letters!', 'incorrect');
+                    return;
+                }
+                
+                const digit = parseInt(value);
+                if (usedDigits.has(digit)) {
+                    showFeedback('Each digit can only be used once!', 'incorrect');
+                    return;
+                }
+                
+                assignment[letter] = digit;
+                usedDigits.add(digit);
+            }
+            
+            // Check for leading zeros
+            if (assignment[puzzle.word1[0]] === 0 || assignment[puzzle.word2[0]] === 0 || assignment[puzzle.result[0]] === 0) {
+                showFeedback('Leading letters cannot be zero!', 'incorrect');
+                return;
+            }
+            
+            // Calculate values
+            const value1 = wordToNumber(puzzle.word1, assignment);
+            const value2 = wordToNumber(puzzle.word2, assignment);
+            const resultValue = wordToNumber(puzzle.result, assignment);
+            
+            // Check if equation is correct
+            if (value1 + value2 === resultValue) {
+                showFeedback(`Correct! ${value1} + ${value2} = ${resultValue}`, 'correct');
+            } else {
+                showFeedback(`Incorrect. ${value1} + ${value2} ≠ ${resultValue}`, 'incorrect');
+            }
+        }
+        
+        // Convert word to number based on assignment
+        function wordToNumber(word, assignment) {
+            let number = 0;
+            for (const letter of word) {
+                number = number * 10 + assignment[letter];
+            }
+            return number;
+        }
+        
+        // Show feedback
+        function showFeedback(message, type) {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = message;
+            feedback.className = `feedback ${type}`;
+            feedback.style.display = 'block';
+        }
+        
+        // Load new puzzle
+        function newPuzzle() {
+            currentPuzzle = (currentPuzzle + 1) % puzzles.length;
+            initializePuzzle();
+        }
+        
+        // Skip puzzle
+        function skipPuzzle() {
+            if (confirm('Are you sure you want to skip this puzzle?')) {
+                newPuzzle();
+            }
+        }
+        
+        // Modal functionality
+        function setupModal() {
+            const modal = document.getElementById('rulesModal');
+            const btn = document.getElementById('rules-btn');
+            const span = document.getElementsByClassName('close')[0];
+            
+            btn.onclick = function() {
+                modal.style.display = 'block';
+            }
+            
+            span.onclick = function() {
+                modal.style.display = 'none';
+            }
+            
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            }
+        }
+        
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            startStopwatch();
+            initializePuzzle();
+            setupModal();
+            
+            document.getElementById('check-btn').addEventListener('click', checkSolution);
+            document.getElementById('new-puzzle-btn').addEventListener('click', newPuzzle);
+        });
+    </script>
+</body>
+</html>
